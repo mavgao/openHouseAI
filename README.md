@@ -1,46 +1,84 @@
-# Getting Started with Create React App
-
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Display Community
 
 ## Available Scripts
 
 In the project directory, you can run:
+
+### `npm i`
+
+Installs dependencies first.
 
 ### `npm start`
 
 Runs the app in the development mode.\
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## Follow Up Question
 
-### `npm test`
+If I were given more time, I would do the following upgrade:
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### UI
 
-### `npm run build`
+#### To enhance the user experience by incorporating Material UI or Ant design framework.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+#### To enhance the user experience by incorporating a loading indicator when the page is rendering data.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+```TypeScript
+const [isLoading, setIsLoading] =  useState<boolean>(true);
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Redux
 
-### `npm run eject`
+#### As it is a simple web application, so I used `useState` and `useEffect` for state management. However, if the web app gets more complicated, I prefer to use Redux for state management.
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+##### Define a slice
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```TypeScript
+const initialState: CommunitiesState = {
+  communities: [],
+};
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+const communitiesSlice = createSlice({
+  name: 'communities',
+  initialState,
+  reducers: {
+    fetchData: (state, action: PayloadAction<Community[]>) => {
+      state.communities = action.payload;
+    },
+  },
+});
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+export const { fetchData} = communitiesSlice.actions;
+export default communitiesSlice.reducer;
+```
 
-## Learn More
+#### Create thunk actions to handle async operations
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```TypeScript
+export const fetchAndProcessCommunities = () => async (dispatch: Dispatch) => {
+  try {
+    const fetchedCommunities: Community[] = await fetchCommunities();
+    const fetchedHomes: Home[] = await fetchHomes();
+    // Process the data as needed
+    const processedData: Community[] = processCommunityHomes(fetchedCommunities, fetchedHomes);
+    dispatch(fetchData(processedData));
+  }
+};
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+#### Use useDispatch and useSelector in Your Component
+
+```TypeScript
+export interface CommunitiesState {
+  communities: Community[];
+}
+
+const dispatch = useDispatch();
+const { communities} = useSelector(
+    (state: { communities: CommunitiesState }) => state.communities
+  );
+
+useEffect(() => {
+    dispatch(fetchAndProcessCommunities());
+  }, [dispatch]);
+```
