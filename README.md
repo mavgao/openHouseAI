@@ -1,4 +1,4 @@
-# Display Community
+# OpenHouse.AI - Front End Web Development Coding Exercise
 
 ## Available Scripts
 
